@@ -96,7 +96,7 @@ private SfFileManager<FileManagerDirectoryContent> _zipManager;
         OverlayStyle = "overlayHide";
         if (args.Action == "read")
         {
-            string AjaxSettingsString = JsonConvert.SerializeObject(args.AjaxSettings);
+            string AjaxSettingsString = JsonConvert.SerializeObject(args.HttpClientInstance);
             Dictionary<string, dynamic> AjaxSettings = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(AjaxSettingsString);
             string dataString = AjaxSettings["data"];
             Dictionary<string, dynamic> data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(dataString);

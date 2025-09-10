@@ -32,7 +32,7 @@
                     </ToolbarItem>
                     <ToolbarItem Align="@ItemAlign.Left">
                         <Template>
-                                <h1 class="e-header-title" title="Document Explorer">Document Explorer</h1>
+                            <h1 class="e-header-title" title="Document Explorer">Document Explorer</h1>
                         </Template>
                     </ToolbarItem>
                     <ToolbarItem Align="@ItemAlign.Right" Id="User" OnClick="ToolbarClick" CssClass="@(_popupVisibility == "e-hide-popup" ? "e-user-icon" : "e-user-icon select-highlight")">
@@ -52,7 +52,7 @@
         <div id="LayoutContent" class="e-mainLayout-content">
             @*sidebar content*@
             <SfSidebar @ref="_sidebar" Animate="false" @bind-IsOpen="SidebarToggle" Target=".e-mainLayout-content" MediaQuery="(min-width: 600px)" Width="260px" Type=SidebarType.Over EnableGestures="false"
-                       OnClose="SidebarClose" OnOpen="SidebarOpen">
+            OnClose="SidebarClose" OnOpen="SidebarOpen">
                 <ChildContent>
                     @*user icon for resolution < 600px*@
                     <div class="e-card e-side-card">
@@ -102,18 +102,32 @@
                 @*file manager*@
                 <SfFileManager @ref="_fileManager" TValue="FileManagerDirectoryContent" Height="100%" ShowThumbnail="@(Field!="Trash")" PopupTarget="BODY" ShowTooltip =false>
                     <FileManagerAjaxSettings Url=@(NavigationManager.BaseUri + "api/"+ (Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/FileOperations")
-                                             GetImageUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/GetImage")
-                                             DownloadUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/Download")
-                                             UploadUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/Upload")>
+                    GetImageUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/GetImage")
+                    DownloadUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/Download")
+                    UploadUrl=@(NavigationManager.BaseUri + "api/"+(Field=="Shared"?"SharedFiles":(Field=="Trash"?"Trash":"FileManager"))+"/Upload")>
                     </FileManagerAjaxSettings>
-                    <FileManagerToolbarSettings Items="@_toolItems"></FileManagerToolbarSettings>
+                    <FileManagerToolbarSettings ToolbarItems="@_toolItems"></FileManagerToolbarSettings>
                     <FileManagerContextMenuSettings File="@_fileMenu" Folder="@_folderMenu" Layout="@_layoutMenu"></FileManagerContextMenuSettings>
                     <FileManagerNavigationPaneSettings Visible="false"></FileManagerNavigationPaneSettings>
+                    <FileManagerUploadSettings UploadMode="UploadMode.HttpClient"></FileManagerUploadSettings>
                     <FileManagerEvents OnSend="BeforeSend" TValue="FileManagerDirectoryContent" ToolbarItemClicked="UploadClick" ToolbarCreated="ToolbarCreate" MenuOpened="MenuOpen" OnMenuClick="MenuClick"
-                                       OnFileOpen="FileOpen" OnFileLoad="FileLoad" BeforePopupOpen="PopupBefore" BeforeImageLoad="ImageLoadBefore" PopupClosed="PopupClosed"></FileManagerEvents>
+                    OnFileOpen="FileOpen" OnFileLoad="FileLoad" BeforePopupOpen="PopupBefore" BeforeImageLoad="ImageLoadBefore" PopupClosed="PopupClosed"></FileManagerEvents>
                 </SfFileManager>
                 <div id="file-overlay" class="e-file-overlay @_fileOverlayDisplay"></div>
             </div>
+        </div>
+        <div class="notification-container">
+            <SfButton IconCss="@(IsContentVisible ? "e-icons e-chevron-up" : "e-icons e-chevron-down")" Content="Note"
+            IconPosition="IconPosition.Right" OnClick="ToggleContent">
+            </SfButton>
+            @if (IsContentVisible)
+            {
+                <div class="notification-content">
+                    File Manager, PDF Viewer, Word Editing, Spreadsheet Editor portions are used and it requires
+                    Essential Studio UI Edition, PDF Viewer SDK, DOCX Editor SDK and Spreadsheet Editor SDK
+                    licenses.
+                </div>
+            }
         </div>
     </div>
     @*popup containing user options like profile, sign out/in*@
@@ -153,6 +167,70 @@
     </SfDialog>
 
 </div>
+<style>
+    .notification-container {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    }
+
+    .notification-container button {
+    background-color: #e0e0e0 !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 13px !important;
+    padding: 2px 12px !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .notification-container button:hover {
+    background-color: #d5d5d5 !important;
+    }
+
+    .notification-content {
+    background-color: #e0e0e0 !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
+    white-space: normal;
+    min-width: 100vw;
+    text-align: center;
+    }
+
+    @@media
+    (max-width: 600px) {
+    .notification-content {
+    font-size: 13px;
+    padding: 8px 8px;
+    }
+    }
+
+    @@media
+    (min-width: 601px) and (max-width: 999px) {
+    .notification-content {
+    font-size: 15px;
+    padding: 10px 20px;
+    }
+    }
+
+    @@media
+    (min-width: 1000px) {
+    .notification-content {
+    font-size: 16px;
+    padding: 12px 32px;
+    }
+    }
+</style>
 @code {
     public string _currentImageUrl { get; set; }
     public string _imageFileName { get; set; }
@@ -178,6 +256,8 @@
     private string OverlayStyle { get; set; } = "overlayShow";
     private string _fileName = "";
 
+    private bool IsContentVisible = true;
+
     private List<OptionsDataModel> _optionsData = new List<OptionsDataModel>() {
         new OptionsDataModel(){Name= "All Files", Id= "1", Select= true, Icon= "sf-icon-Allfiles"},
         new OptionsDataModel(){Name= "Recent Files", Id= "2", Select= false, Icon= "sf-icon-RecentFiles" },
@@ -197,11 +277,6 @@
     //private string[] SelectedItems { get; set; }
     private bool _treeSelectFlag = false;
     private string _treeNode = "1";
-    private string[] _toolItems = new string[] {
-                   #if !Publish
-                    "Upload",
-                   #endif
-        "Delete", "Download", "Rename", "SortBy", "Refresh", "Selection", "View", "Details" };
     private string[] _fileMenu = new string[] { "Open", "|", "Delete", "Download",  "Rename", "|", "Details" };
     private string[] _folderMenu = new string[] { "Open", "|", "Delete", "Download", "Rename", "|", "Details" };
     private string[] _layoutMenu = new string[] { "SortBy", "View", "Refresh", "|", "NewFolder",
@@ -210,10 +285,25 @@
                     #endif
                     "|", "Details", "SelectAll" };
     private bool isImageOpen = false;
+    public List<ToolBarItemModel> _toolItems = new List<ToolBarItemModel>();
+
+
 
     protected override void OnInitialized()
     {
         _fileOverlayDisplay = "e-file-show-overlay";
+
+        string[] _toolItemsIn = new string[] {
+        #if !Publish
+        "Upload",
+        #endif
+        "Delete", "Download", "Rename", "SortBy", "Refresh", "Selection", "View", "Details"
+    };
+
+        foreach (var item in _toolItemsIn)
+        {
+            _toolItems.Add(new ToolBarItemModel() { Name = item });
+        }
         Path = "/";
         if (QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("path", out var pathparam))
         {
@@ -274,7 +364,13 @@
         {
             //Recent Files
             case "2":
-                _toolItems = new string[] { "Download", "Rename", "SortBy", "Refresh", "Selection", "View", "Details" };
+                _toolItems.Clear();
+
+               string[] _toolItemsIn = new string[] { "Download", "Rename", "SortBy", "Refresh", "Selection", "View", "Details" };
+                foreach (var item in _toolItemsIn)
+                {
+                    _toolItems.Add(new ToolBarItemModel() { Name = item });
+                }
                 _fileMenu = new string[] { "Open", "|", "Delete", "Download",  "Rename", "|", "Details" };
                 _folderMenu = new string[] { "Open", "|", "Delete", "Download", "Rename", "|", "Details" };
                 _layoutMenu = new string[] { "SortBy", "View", "Refresh", "|", "NewFolder",
@@ -286,7 +382,12 @@
                 break;
             //Shared With Me
             case "3":
-                _toolItems = new string[] { "Download", "SortBy", "Refresh", "Selection", "View", "Details" };
+                _toolItems.Clear();
+                _toolItemsIn = new string[] { "Download", "SortBy", "Refresh", "Selection", "View", "Details" };
+                foreach (var item in _toolItemsIn)
+                {
+                    _toolItems.Add(new ToolBarItemModel() { Name = item });
+                }
                 _fileMenu = new string[] { "Open", "|", "Download", "|", "Details" };
                 _folderMenu = new string[] { "Open", "|", "Download", "|", "Details" };
                 _layoutMenu = new string[] { "SortBy", "|", "View", "|", "Refresh", "|", "Details", "|", "SelectAll" };
@@ -294,7 +395,12 @@
                 break;
             //Trash
             case "4":
-                _toolItems = new string[] { "Delete", "SortBy", "Refresh", "Selection", "View", "Details" };
+                _toolItems.Clear();
+                _toolItemsIn = new string[] { "Delete", "SortBy", "Refresh", "Selection", "View", "Details" };
+                foreach (var item in _toolItemsIn)
+                {
+                    _toolItems.Add(new ToolBarItemModel() { Name = item });
+                }
                 _fileMenu = new string[] { "Delete", "|", "Details", "|", "Restore", "EmptyTrash", "|", "SelectAll" };
                 _folderMenu = new string[] { "Download", "|", "Details", "|", "Restore", "EmptyTrash", "|", "SelectAll" };
                 _layoutMenu = new string[] { "SortBy", "View", "Refresh", "|", "Details", "SelectAll", "|", "Restore", "EmptyTrash" };
@@ -306,11 +412,16 @@
                 break;
             //All Files
             default:
-                _toolItems = new string[] {
+                _toolItems.Clear();
+                _toolItemsIn = new string[] {
                     #if !Publish
                     "Upload",
                     #endif
                     "Delete", "Download", "Rename", "SortBy", "Refresh", "Selection", "View", "Details" };
+                foreach (var item in _toolItemsIn)
+                {
+                    _toolItems.Add(new ToolBarItemModel() { Name = item });
+                }
                 _fileMenu = new string[] { "Open", "|", "Delete", "Download",  "Rename", "|", "Details" };
                 _folderMenu = new string[] { "Open", "|", "Delete", "Download", "Rename", "|", "Details" };
                 _layoutMenu = new string[] { "SortBy", "View", "Refresh", "|", "NewFolder",
@@ -368,6 +479,11 @@
                 NavigationManager.NavigateTo("https://github.com/syncfusion/blazor-showcase-document-explorer");
                 break;
         }
+    }
+
+    private void ToggleContent()
+    {
+        IsContentVisible = !IsContentVisible;
     }
     private async void NewClick()
     {
